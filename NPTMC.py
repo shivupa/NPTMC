@@ -254,11 +254,6 @@ print "EQUILIBRATION COMPLETE"
 print "ACCEPTANCE RATIO:",numaccept/numEquil
 numaccept=0
 print "MAIN RUN START"
-fig = plt.figure()
-fig.set_dpi(100)
-fig.set_size_inches(7, 6.5)
-
-plt.show()
 print "MAIN RUN FINISH"
 print "ACCEPTANCE RATIO:",numaccept/numEquil
 print "AVG E: ",
