@@ -2,7 +2,7 @@ import numpy as np
 import scipy.constants as sc
 import math
 import matplotlib
-matplotlib.use("Agg")
+#matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
@@ -111,67 +111,6 @@ def Energy(Oloc, Mloc, H1loc, H2loc):
             E-= C/dist(Oloc[i],Oloc[j])
             j+=1
     return E
-def plotter(step,Oloc, Mloc, H1loc, H2loc):
-    Eold = Energy(Oloc, Mloc, H1loc, H2loc)
-    Eavg = 0
-    avgL = 0
-    wat = np.random.randint(N)
-    #volume move
-    if (i % 600 == 0 ):
-        V = VO + ((0.5*np.random.random_sample()*deltaVol)*2.0)
-        Oloc *= V/VO
-        Mloc *= V/VO
-        H1loc *= V/VO
-        H2loc *= V/VO
-        Enew = Energy(Oloc, Mloc, H1loc, H2loc)
-        w = (Enew - Eold)+ (P*(V-VO)) - (N*kb*T*np.log(V/VO))
-        if (w<=0 or np.exp(-w/(kb*T)) > np.random.random_sample()):
-            Eold=Enew
-            L=np.power(V,1.0/3.0)
-            Eavg +=Eold/100
-            avgL +=L/100
-            numaccept+=1
-        else:
-            Oloc /= V/VO
-            Mloc /= V/VO
-            H1loc /= V/VO
-            H2loc /= V/VO
-    else:
-        oldOloc = Oloc[wat]
-        oldMloc = Mloc[wat]
-        oldH1loc = H1loc[wat]
-        oldH2loc = H2loc[wat]
-        #translate move
-        move = (np.random.random_sample(3)-0.5)*deltaTrans*2.0
-        Oloc[wat] += move
-        Mloc[wat] += move
-        H1loc[wat] += move
-        H2loc[wat] += move
-        #rotate move
-        theta = (deltaTheta - (-deltaTheta)) * np.random.random_sample() + (-deltaTheta)
-        com = (Oloc[wat]*16 +H1loc[wat] + H2loc[wat])/ 18.00
-        Oloc[wat] = ArbRot(theta,com,Oloc[wat])
-        H1loc[wat] = ArbRot(theta,com,H1loc[wat])
-        H2loc[wat] = ArbRot(theta,com,H2loc[wat])
-        Mloc[wat] = ArbRot(theta,com,Mloc[wat])
-
-        Enew = Energy(Oloc, Mloc, H1loc, H2loc)
-    if(i%numPrint==0):
-        print "AVG E: ",
-        print Eavg
-        print "AVG L: ",
-        print avgL
-    if(step == 0 or i%numPrint==0):
-        print step
-        ax = fig.add_subplot(111, projection='3d')
-        for j in range(N):
-            ax.plot([Oloc[j,0],H1loc[j,0]],[Oloc[j,1],H1loc[j,1]],[Oloc[j,2],H1loc[j,2]],'k-', zdir='z')
-            ax.plot([Oloc[j,0],H2loc[j,0]],[Oloc[j,1],H2loc[j,1]],[Oloc[j,2],H2loc[j,2]],'k-', zdir='z')
-            #ax.plot([0,Mloc[i,0]],[0,Mloc[i,1]],[0,Mloc[i,2]],'k-', zdir='z')
-            ax.scatter(Oloc[j,0],Oloc[j,1],Oloc[j,2], zdir='z', s=50, c='r', depthshade=False)
-            ax.scatter(H1loc[j,0],H1loc[j,1],H1loc[j,2], zdir='z', s=20, c='k', depthshade=False)
-            ax.scatter(H2loc[j,0],H2loc[j,1],H2loc[j,2], zdir='z', s=20, c='k', depthshade=False)
-        return ax
 
 L = (4.00*5) + 1.354
 print "L", L
@@ -202,14 +141,25 @@ for i in range(5):
 Eold = Energy(Oloc, Mloc, H1loc, H2loc)
 print dist(H1loc[0],H2loc[0]),dist(Oloc[0],H1loc[0]) ,dist(Oloc[0],H2loc[0]),dist(Oloc[0],Mloc[0])
 
-numaccept=0
+numaccept=0.0
 
-
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+for i in range(N):
+    ax.plot([Oloc[i,0],H1loc[i,0]],[Oloc[i,1],H1loc[i,1]],[Oloc[i,2],H1loc[i,2]],'k-', zdir='z')
+    ax.plot([Oloc[i,0],H2loc[i,0]],[Oloc[i,1],H2loc[i,1]],[Oloc[i,2],H2loc[i,2]],'k-', zdir='z')
+    #ax.plot([0,Mloc[i,0]],[0,Mloc[i,1]],[0,Mloc[i,2]],'k-', zdir='z')
+    ax.scatter(Oloc[i,0],Oloc[i,1],Oloc[i,2], zdir='z', s=50, c='r', depthshade=False)
+    ax.scatter(H1loc[i,0],H1loc[i,1],H1loc[i,2], zdir='z', s=20, c='k', depthshade=False)
+    ax.scatter(H2loc[i,0],H2loc[i,1],H2loc[i,2], zdir='z', s=20, c='k', depthshade=False)
+#plt.show()
+plt.savefig("test0.png")
 print "EQUILIBRATION START"
-for i in range(10):
+for i in range(2000):
     wat = np.random.randint(N)
     #volume move
-    if (i % 600 == 0 ):
+    if i%600 == 0 :
+        print "STEP NUMBER: ", i
         V = VO + ((0.5*np.random.random_sample()*deltaVol)*2.0)
         Oloc *= V/VO
         Mloc *= V/VO
@@ -226,7 +176,18 @@ for i in range(10):
             Mloc /= V/VO
             H1loc /= V/VO
             H2loc /= V/VO
-
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        for i in range(N):
+            ax.plot([Oloc[i,0],H1loc[i,0]],[Oloc[i,1],H1loc[i,1]],[Oloc[i,2],H1loc[i,2]],'k-', zdir='z')
+            ax.plot([Oloc[i,0],H2loc[i,0]],[Oloc[i,1],H2loc[i,1]],[Oloc[i,2],H2loc[i,2]],'k-', zdir='z')
+            #ax.plot([0,Mloc[i,0]],[0,Mloc[i,1]],[0,Mloc[i,2]],'k-', zdir='z')
+            ax.scatter(Oloc[i,0],Oloc[i,1],Oloc[i,2], zdir='z', s=50, c='r', depthshade=False)
+            ax.scatter(H1loc[i,0],H1loc[i,1],H1loc[i,2], zdir='z', s=20, c='k', depthshade=False)
+            ax.scatter(H2loc[i,0],H2loc[i,1],H2loc[i,2], zdir='z', s=20, c='k', depthshade=False)
+        #plt.show()
+        plt.savefig("test"+str(i)+".png")
+        plt.close(fig)
     else:
         oldOloc = Oloc[wat]
         oldMloc = Mloc[wat]
@@ -245,13 +206,12 @@ for i in range(10):
         H1loc[wat] = ArbRot(theta,com,H1loc[wat])
         H2loc[wat] = ArbRot(theta,com,H2loc[wat])
         Mloc[wat] = ArbRot(theta,com,Mloc[wat])
-
         Enew = Energy(Oloc, Mloc, H1loc, H2loc)
-avgL = L/100
-Eavg = Eold/100
+avgL = L/100.0
+Eavg = Eold/100.0
 
 print "EQUILIBRATION COMPLETE"
-print "ACCEPTANCE RATIO:",numaccept/numEquil
+print "ACCEPTANCE RATIO:",(float)(numaccept)
 numaccept=0
 print "MAIN RUN START"
 print "MAIN RUN FINISH"
@@ -262,3 +222,14 @@ print "AVG L: ",
 print avgL
 #TODO make a check at the end to make sure distances didnt change
 print dist(H1loc[0],H2loc[0]),dist(Oloc[0],H1loc[0]) ,dist(Oloc[0],H2loc[0]),dist(Oloc[0],Mloc[0])
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+for i in range(N):
+    ax.plot([Oloc[i,0],H1loc[i,0]],[Oloc[i,1],H1loc[i,1]],[Oloc[i,2],H1loc[i,2]],'k-', zdir='z')
+    ax.plot([Oloc[i,0],H2loc[i,0]],[Oloc[i,1],H2loc[i,1]],[Oloc[i,2],H2loc[i,2]],'k-', zdir='z')
+    #ax.plot([0,Mloc[i,0]],[0,Mloc[i,1]],[0,Mloc[i,2]],'k-', zdir='z')
+    ax.scatter(Oloc[i,0],Oloc[i,1],Oloc[i,2], zdir='z', s=50, c='r', depthshade=False)
+    ax.scatter(H1loc[i,0],H1loc[i,1],H1loc[i,2], zdir='z', s=20, c='k', depthshade=False)
+    ax.scatter(H2loc[i,0],H2loc[i,1],H2loc[i,2], zdir='z', s=20, c='k', depthshade=False)
+#plt.show()
+plt.savefig("test10000.png")
